@@ -1,0 +1,96 @@
+<div class="pl-2">
+    <div class="list-inline">
+        <% if(typeof handle != 'undefined'){ %>
+            <h3 class="list-inline-item">
+                <b>
+                    <%= handle %>'s Blog
+                </b>
+            </h3>
+        <% } %>
+        <% if(typeof handle != 'undefined' && user !== null && user.handle == handle){ %>
+            <div class="list-inline-item float-right my-small-text mt-2">
+                <a href="/blog/new" class="my-link">
+                    Add new blog entry
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <% if(blogs.length == 0){ %>
+        No blog entries written.
+    <% } %>
+
+    <% blogs.forEach((blog) => { %>
+        <div class="mb-4">
+            <!-- blog title -->
+            <h3>
+                <a href="/blog/entry/<%= blog.ID %>" class="my-link"> <%= blog.TITLE %> </a>
+            </h3>
+            <!-- author + time -->
+            <ul class="list-inline">
+                <li class="list-inline-item my-small-text">
+                    By <%- include('../../../partials/handle', {handle : blog.AUTHOR, color : blog.COLOR}) %>, <%= blog.CREATION_TIME %> <%= (blog.CREATION_TIME == 'now')? '' : ' ago' %>
+                </li>
+            </ul>
+            <!-- body -->
+            <div class="my-blog-post">
+                <div class="ml-3">
+                    <p class="px-3">
+                        <%- blog.BODY %>
+                    </p>
+                </div>
+            </div>
+            <div class="mb-1">
+                <span class="text-info">tags: </span>
+                <span class="text-muted"><%= blog.TAGS.map(x=>'#'+x).join(', ') %></span>
+            </div>
+            <!-- info -->
+            <div class="card">
+                <ul class="list-inline card-body py-1 my-card-no-bottom">
+                    <!-- votes -->
+                    <li class="list-inline-item my-vote-cnt <%= blog.VOTE_CNT == 0? 'text-muted' : (blog.VOTE_CNT > 0? 'text-success' : 'text-danger')%>">
+                        <b>
+                            <%= (blog.VOTE_CNT > 0? '+' : '') + blog.VOTE_CNT %>
+                        </b>
+                    </li>
+                    <!-- upvote -->
+                    <% if(blog.VOTED == 'UP'){ %>
+                        <li class="list-inline-item" >
+                            <button id='<%= blog.ID  %>_null_up' class="btn btn-link my-non-btn" <%-`onclick="removeVote(` + blog.ID + `, null)"`%>>
+                                <b>upvoted</b> 
+                            </button>
+                        </li>
+                    <% } else { %>
+                        <li class="list-inline-item" >
+                            <button id='<%= blog.ID %>_null_up' class="btn btn-link my-non-btn" <%-'onclick="addVote(' + blog.ID + ', true, null)"'%>>
+                                upvote
+                            </button>
+                        </li>
+                    <% } %>
+                    <!-- downvote -->
+                    <% if(blog.VOTED == 'DOWN'){ %>
+                        <li class="list-inline-item" >
+                            <button id='<%= blog.ID %>_null_down' class="btn btn-link my-non-btn" <%-'onclick="removeVote(' + blog.ID + ', null)"'%>>
+                                <b>downvoted</b>  
+                            </button>
+                        </li>
+                    <% } else { %>
+                        <li class="list-inline-item" >
+                            <button id='<%= blog.ID %>_null_down' class="btn btn-link my-non-btn" <%-'onclick="addVote(' + blog.ID + ', false, null)"'%>>
+                                downvote
+                            </button>
+                        </li>
+                    <% } %>
+                    <!-- comments -->
+                    <li class="list-inline-item float-right">
+                        <a href="/blog/entry/<%= blog.ID %>" class="my-link"> <%= blog.CMNT_CNT %> comments </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    <% }) %>
+
+    
+</div>
+
+<%- include('../../../partials/voteScript') %>

@@ -1,0 +1,150 @@
+<% if(adminContest) { %>
+    <ul class="list-inline">
+        <li class="list-inline-item">
+            <b class="text-danger pl-1">
+                You are administrating this contest
+            </b>
+        </li>
+        <% if(Date.now() - contest.TIME_START <= contest.DURATION*60*1000) { %>
+            <li class="list-inline-item my-small-text float-right">
+                <a href="/contest/<%= contest.ID %>/edit">
+                    Edit Contest Details
+                </a>
+            </li>
+        <% } %>
+    </ul>
+<% } %>
+
+<% if(msg != null) { %>
+    <ul class="list-inline">
+        <li class="list-inline-item">
+            <b class="text-info pl-1">
+                <% if(msg === 'invalid'){ %>
+                    You are not registered for this contest.
+                <% } else { %>
+                    You are registered with "<%= msg.HANDLE %>" for this contest.
+                <% } %>
+            </b>
+        </li>
+    </ul>
+<% } %>
+
+<b class="float-left"></b>
+<div class="card border">
+    <div class="card-header my-card-header">
+        Problems
+    </div>
+    <table class="table table-sm table-bordered my-card-no-bottom">
+        <!-- list header -->
+        <tr>
+            <th width="8%" class="text-center">#</th>
+            <th width="53%" class="pl-3">name</th>
+            <th width="22%" class="text-center">limits</th>
+            <th width="10%"></th>
+            <th width="8%" class="text-center">Solved</th>
+        </tr>
+        <!-- each row -->
+        <% for(let i = 0; i<problems.length; i++){ %>
+            <% let rank =  String.fromCharCode(65+i) %>
+            <tr class="<%= (i%2 == 1)? 'my-row-alter' : '' %>">
+                <td class="text-center">
+                    <a href="/contest/<%= contest.ID %>/problem/<%= rank %>">
+                        <%= rank %>
+                    </a>
+                </td>
+                <td class="pl-3" >
+                    <a href="/contest/<%= contest.ID %>/problem/<%= rank %>">
+                        <%= problems[i].NAME %>
+                    </a>
+                </td>
+                <td class="text-center text-muted my-small-text">
+                    <%= problems[i].TL/1000 %> s,
+                    <%= problems[i].ML %> MB,
+                    <%= problems[i].SL %> B
+                </td>
+                <td class="text-center">
+                    <a href="/contest/<%= contest.ID %>/submit?problem=<%= rank %>">
+                        Submit
+                    </a>
+                </td>
+                <td class="text-center">
+                    <%= problems[i].SOLVE_CNT %>
+                </td>
+            </tr>
+        <% } %>
+    </table>
+    <% if(adminContest && contest.TIME_START > new Date()) { %>
+        <div class="card-footer text-center py-2" style="background-color: #E1E1E1;">
+                <a href="/contest/<%= contest.ID %>/problem/new">
+                    add new problem
+                </a> 
+        </div>
+    <% } %>
+</div>
+
+<!-- Announcements -->
+<div class="card border mt-5">
+    <div class="card-header my-card-header">
+        Announcements
+    </div>
+    <table class="table table-sm table-bordered my-card-no-bottom">
+        <!-- list header -->
+        <tr>
+            <th width="15%" class="text-center">When</th>
+            <th width="*"></th>
+            <% if(contest.IS_ADMIN){ %>
+                <th width="10%"></th>
+            <% } %>
+        </tr>
+        <!-- each row -->
+        <% for(let i = 0; i<announcements.length; i++){ %>
+            <tr>
+                <td class="my-td-center">
+                    <b># <%= i+1 %> </b><br>
+                    <%= announcements[i].CREATION_TIME.toLocaleString('en-GB') %>
+                </td>
+                <td class="pl-3" >
+                    <%= announcements[i].BODY %>
+                </td>
+                <% if(contest.IS_ADMIN){ %>
+                    <td class="my-td-center">
+                        <form action="" method="POST">
+                            <input type="hidden" name="type" value="delete">
+                            <input type="hidden" name="ann_no" value="<%= i+1 %>">
+                            <input type="submit" value="delete" class="btn btn-danger">
+                        </form>
+                    </td>
+                <% } %>
+            </tr>
+        <% } %>
+        <% if(contest.IS_ADMIN) { %>
+            <!-- <tr class="bg-info" >
+                <td style="min-height: 10px;" colspan="3"></td>
+            </tr> -->
+            <tr>
+                <td colspan="3" class="text-center">
+                    <form action="" method="POST">
+                        <input type="hidden" name="type" value="post">
+                        <!-- <label for="announcement"> -->
+                            <b class="my-clickable text-info" data-target="#new" data-toggle="collapse">
+                                New Announcement
+                            </b>
+                        <!-- </label> -->
+                        <div class="collapse" id="new">
+                            <textarea name="announcement" class="form-control" rows="3"></textarea>
+                            <input type="submit" value="Post" class="mt-1 btn btn-success float-right">
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        <% } %>
+    </table>
+</div>
+
+<% if(contest.IS_ADMIN && contest.NOT_UPDATED){ %>
+    <div class="text-center mt-5">
+        <form action="/contest/<%= contest.ID %>/update-rating" method="POST">
+            <input type="submit" value="Update Rating" class="btn btn-success">
+        </form>
+    </div>
+<% } %>
